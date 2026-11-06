@@ -1,6 +1,6 @@
 const shell=document.querySelector("#portfolio");
 const pages=[...document.querySelectorAll(".work")];
-let active="",designIndex=0,wheelProgress=0,rainProgress=0;
+let active="",designIndex=0,wheelProgress=0,rainProgress=0,clockRaf=0,clockStartedAt=0;
 const designs=[
   ["概念海报 · 让想法被看见","art-poster"],["刊物练习 · 静谧的一期","art-editorial"],["色彩研究 · 日常的温度","art-color"],["作品集封面 · Bare Branches","art-cover"],["字形练习 · 字与形","art-type"],["版式研究 · Layout as language","art-grid"]
 ];
@@ -28,7 +28,27 @@ function updateDesign(){
   else if(source)art.innerHTML=source.innerHTML;
   spot.querySelector(".spot-art").replaceChildren(art);
 }
-function resetDesign(){designIndex=0;wheelProgress=0;document.querySelector(".design-page").classList.remove("show-spot");document.querySelector(".clock-gallery").classList.remove("zooming");updateDesign()}
+const secondHand=document.querySelector(".second");
+const orbitCards=[...document.querySelectorAll(".orbit")];
+const clockRevolution=30000;
+function animateClock(now){
+  if(active!=="design"||shell.hidden){clockRaf=0;return}
+  const sweep=(now-clockStartedAt)/clockRevolution*360;
+  secondHand.style.transform=`translateX(-50%) rotate(${sweep%360}deg)`;
+  orbitCards.forEach((card,index)=>{
+    const progress=Math.max(0,Math.min(1,(sweep-index*60)/60));
+    const reveal=progress*progress*(3-2*progress);
+    card.style.opacity=reveal.toFixed(3);
+    card.style.transform=`translateY(${(1-reveal)*10}px) scale(${.94+reveal*.06})`;
+  });
+  clockRaf=requestAnimationFrame(animateClock);
+}
+function resetDesign(){
+  designIndex=0;wheelProgress=0;document.querySelector(".design-page").classList.remove("show-spot");document.querySelector(".clock-gallery").classList.remove("zooming");updateDesign();
+  cancelAnimationFrame(clockRaf);clockStartedAt=performance.now();
+  if(window.matchMedia("(prefers-reduced-motion: reduce)").matches){secondHand.style.transform="translateX(-50%) rotate(0deg)";orbitCards.forEach(card=>{card.style.opacity="1";card.style.transform="none"});return}
+  clockRaf=requestAnimationFrame(animateClock);
+}
 function showSpot(){document.querySelector(".design-page").classList.add("show-spot")}
 document.querySelector(".clock-enter").addEventListener("click",showSpot);
 document.querySelector(".browse-design").addEventListener("click",showSpot);
