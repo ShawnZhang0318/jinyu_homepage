@@ -9,23 +9,20 @@ const coverShutters=document.querySelector(".cover-shutters"),shutterFrame=docum
 const shutterSlats=Array.from({length:10},(_,index)=>{
   const slat=document.createElement("span");slat.className="shutter-slat";
   slat.style.setProperty("--row-top",`${index*10}%`);
-  slat.innerHTML='<i class="shutter-face shutter-front"></i><i class="shutter-face shutter-back"></i>';
+  slat.innerHTML='<i class="shutter-face shutter-front"><span class="shutter-snapshot"></span></i><i class="shutter-face shutter-back"></i>';
   shutterFrame.append(slat);return slat;
 });
-let coverTransitioning=false,coverStartTime=0,coverScrollStart=0,coverScrollEnd=0,coverScrollBehavior="";
+let coverTransitioning=false,coverStartTime=0,coverScrollEnd=0,coverScrollBehavior="";
 const coverTransitionDuration=1750;
 function easeTransition(value){return value<.5?4*value*value*value:1-Math.pow(-2*value+2,3)/2}
 function animateCoverTransition(now){
   const progress=Math.min(1,(now-coverStartTime)/coverTransitionDuration);
-  const eased=easeTransition(progress);
-  window.scrollTo(0,coverScrollStart+(coverScrollEnd-coverScrollStart)*eased);
   const stagger=.045,span=1-stagger*(shutterSlats.length-1);
   shutterSlats.forEach((slat,index)=>{
     const local=Math.max(0,Math.min(1,(progress-stagger*index)/span));
     slat.style.transform=`rotateX(${easeTransition(local)*180}deg)`;
   });
   if(progress<1){requestAnimationFrame(animateCoverTransition);return}
-  window.scrollTo(0,coverScrollEnd);
   coverShutters.classList.add("done");coverShutters.classList.remove("active");
   document.documentElement.style.scrollBehavior=coverScrollBehavior;
   coverTransitioning=false;
@@ -34,18 +31,24 @@ function startCoverTransition(){
   if(coverTransitioning||!shell.hidden)return;
   if(window.matchMedia("(prefers-reduced-motion: reduce)").matches){aboutSection.scrollIntoView({behavior:"auto"});return}
   coverTransitioning=true;
-  const imageRect=document.querySelector(".cover-art").getBoundingClientRect();
+  const scrollStart=window.scrollY;
+  const navCopy=document.querySelector(".site-nav").cloneNode(true);
+  const coverCopy=cover.cloneNode(true);
+  coverCopy.removeAttribute("id");coverCopy.style.position="absolute";coverCopy.style.inset="0";coverCopy.style.width="100%";coverCopy.style.height="100%";coverCopy.style.minHeight="0";
+  coverCopy.querySelector(".cover-art").style.animation="none";
+  navCopy.style.top="0";
   shutterSlats.forEach((slat,index)=>{
     const rowTop=window.innerHeight*index/shutterSlats.length;
-    slat.style.setProperty("--photo-left",`${imageRect.left}px`);
-    slat.style.setProperty("--photo-top",`${imageRect.top-rowTop}px`);
-    slat.style.setProperty("--photo-width",`${imageRect.width}px`);
-    slat.style.setProperty("--photo-height",`${imageRect.height}px`);
+    slat.style.setProperty("--snapshot-offset",`${-rowTop}px`);
+    const snapshot=slat.querySelector(".shutter-snapshot");
+    snapshot.replaceChildren(navCopy.cloneNode(true),coverCopy.cloneNode(true));
+    snapshot.style.transform=`translateY(${-scrollStart}px)`;
     slat.style.transform="rotateX(0deg)";
   });
-  coverScrollStart=window.scrollY;coverScrollEnd=coverScrollStart+aboutSection.getBoundingClientRect().top;
+  coverScrollEnd=scrollStart+aboutSection.getBoundingClientRect().top;
   coverScrollBehavior=document.documentElement.style.scrollBehavior;
   document.documentElement.style.scrollBehavior="auto";
+  window.scrollTo(0,coverScrollEnd);
   coverStartTime=performance.now();coverShutters.classList.remove("done");coverShutters.classList.add("active");
   requestAnimationFrame(animateCoverTransition);
 }
