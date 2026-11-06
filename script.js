@@ -9,41 +9,52 @@ const coverShutters=document.querySelector(".cover-shutters"),shutterFrame=docum
 const shutterSlats=Array.from({length:10},(_,index)=>{
   const slat=document.createElement("span");slat.className="shutter-slat";
   slat.style.setProperty("--row-top",`${index*10}%`);
-  slat.style.setProperty("--front-position",`${index/9*100}%`);
-  slat.style.setProperty("--back-position",`${(9-index)/9*100}%`);
-  slat.style.setProperty("--delay",`${index*.035}s`);
   slat.innerHTML='<i class="shutter-face shutter-front"></i><i class="shutter-face shutter-back"></i>';
   shutterFrame.append(slat);return slat;
 });
-let coverTransitioning=false;
-function finishCoverTransition(){
-  const scrollBehavior=document.documentElement.style.scrollBehavior;
-  document.documentElement.style.scrollBehavior="auto";
-  window.scrollTo(0,aboutSection.getBoundingClientRect().top+window.scrollY);
-  document.documentElement.style.scrollBehavior=scrollBehavior;
-  coverShutters.classList.add("leaving");
-  const cleanup=event=>{
-    if(event.target!==coverShutters||event.propertyName!=="opacity")return;
-    coverShutters.removeEventListener("transitionend",cleanup);
-    coverShutters.classList.remove("active","leaving");coverTransitioning=false;
-  };
-  coverShutters.addEventListener("transitionend",cleanup);
+let coverTransitioning=false,coverStartTime=0,coverScrollStart=0,coverScrollEnd=0,coverScrollBehavior="";
+const coverTransitionDuration=1750;
+function easeTransition(value){return value<.5?4*value*value*value:1-Math.pow(-2*value+2,3)/2}
+function animateCoverTransition(now){
+  const progress=Math.min(1,(now-coverStartTime)/coverTransitionDuration);
+  const eased=easeTransition(progress);
+  window.scrollTo(0,coverScrollStart+(coverScrollEnd-coverScrollStart)*eased);
+  const stagger=.045,span=1-stagger*(shutterSlats.length-1);
+  shutterSlats.forEach((slat,index)=>{
+    const local=Math.max(0,Math.min(1,(progress-stagger*index)/span));
+    slat.style.transform=`rotateX(${easeTransition(local)*180}deg)`;
+  });
+  if(progress<1){requestAnimationFrame(animateCoverTransition);return}
+  window.scrollTo(0,coverScrollEnd);
+  coverShutters.classList.add("done");coverShutters.classList.remove("active");
+  document.documentElement.style.scrollBehavior=coverScrollBehavior;
+  coverTransitioning=false;
 }
 function startCoverTransition(){
   if(coverTransitioning||!shell.hidden)return;
   if(window.matchMedia("(prefers-reduced-motion: reduce)").matches){aboutSection.scrollIntoView({behavior:"auto"});return}
   coverTransitioning=true;
   const imageRect=document.querySelector(".cover-art").getBoundingClientRect();
-  shutterFrame.style.left=`${imageRect.left}px`;shutterFrame.style.top=`${imageRect.top}px`;
-  shutterFrame.style.width=`${imageRect.width}px`;shutterFrame.style.height=`${imageRect.height}px`;
-  shutterSlats.at(-1).addEventListener("animationend",finishCoverTransition,{once:true});
-  coverShutters.classList.remove("leaving");coverShutters.classList.add("active");
+  shutterSlats.forEach((slat,index)=>{
+    const rowTop=window.innerHeight*index/shutterSlats.length;
+    slat.style.setProperty("--photo-left",`${imageRect.left}px`);
+    slat.style.setProperty("--photo-top",`${imageRect.top-rowTop}px`);
+    slat.style.setProperty("--photo-width",`${imageRect.width}px`);
+    slat.style.setProperty("--photo-height",`${imageRect.height}px`);
+    slat.style.transform="rotateX(0deg)";
+  });
+  coverScrollStart=window.scrollY;coverScrollEnd=coverScrollStart+aboutSection.getBoundingClientRect().top;
+  coverScrollBehavior=document.documentElement.style.scrollBehavior;
+  document.documentElement.style.scrollBehavior="auto";
+  coverStartTime=performance.now();coverShutters.classList.remove("done");coverShutters.classList.add("active");
+  requestAnimationFrame(animateCoverTransition);
 }
 cover.addEventListener("click",event=>{
   if(event.target.closest(".scroll-cue"))event.preventDefault();
   startCoverTransition();
 });
 window.addEventListener("wheel",event=>{
+  if(coverTransitioning){event.preventDefault();return}
   if(!shell.hidden||event.deltaY<=0||cover.getBoundingClientRect().bottom<window.innerHeight*.4)return;
   event.preventDefault();startCoverTransition();
 },{passive:false});
