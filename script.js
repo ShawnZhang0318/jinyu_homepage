@@ -4,6 +4,49 @@ let active="",designIndex=0,wheelProgress=0,rainProgress=0,clockRaf=0,clockStart
 const designs=[
   ["概念海报 · 让想法被看见","art-poster"],["刊物练习 · 静谧的一期","art-editorial"],["色彩研究 · 日常的温度","art-color"],["作品集封面 · Bare Branches","art-cover"],["字形练习 · 字与形","art-type"],["版式研究 · Layout as language","art-grid"]
 ];
+const cover=document.querySelector("#cover"),aboutSection=document.querySelector("#about");
+const coverShutters=document.querySelector(".cover-shutters"),shutterFrame=document.querySelector(".shutter-frame");
+const shutterSlats=Array.from({length:10},(_,index)=>{
+  const slat=document.createElement("span");slat.className="shutter-slat";
+  slat.style.setProperty("--row-top",`${index*10}%`);
+  slat.style.setProperty("--front-position",`${index/9*100}%`);
+  slat.style.setProperty("--back-position",`${(9-index)/9*100}%`);
+  slat.style.setProperty("--delay",`${index*.035}s`);
+  slat.innerHTML='<i class="shutter-face shutter-front"></i><i class="shutter-face shutter-back"></i>';
+  shutterFrame.append(slat);return slat;
+});
+let coverTransitioning=false;
+function finishCoverTransition(){
+  const scrollBehavior=document.documentElement.style.scrollBehavior;
+  document.documentElement.style.scrollBehavior="auto";
+  window.scrollTo(0,aboutSection.getBoundingClientRect().top+window.scrollY);
+  document.documentElement.style.scrollBehavior=scrollBehavior;
+  coverShutters.classList.add("leaving");
+  const cleanup=event=>{
+    if(event.target!==coverShutters||event.propertyName!=="opacity")return;
+    coverShutters.removeEventListener("transitionend",cleanup);
+    coverShutters.classList.remove("active","leaving");coverTransitioning=false;
+  };
+  coverShutters.addEventListener("transitionend",cleanup);
+}
+function startCoverTransition(){
+  if(coverTransitioning||!shell.hidden)return;
+  if(window.matchMedia("(prefers-reduced-motion: reduce)").matches){aboutSection.scrollIntoView({behavior:"auto"});return}
+  coverTransitioning=true;
+  const imageRect=document.querySelector(".cover-art").getBoundingClientRect();
+  shutterFrame.style.left=`${imageRect.left}px`;shutterFrame.style.top=`${imageRect.top}px`;
+  shutterFrame.style.width=`${imageRect.width}px`;shutterFrame.style.height=`${imageRect.height}px`;
+  shutterSlats.at(-1).addEventListener("animationend",finishCoverTransition,{once:true});
+  coverShutters.classList.remove("leaving");coverShutters.classList.add("active");
+}
+cover.addEventListener("click",event=>{
+  if(event.target.closest(".scroll-cue"))event.preventDefault();
+  startCoverTransition();
+});
+window.addEventListener("wheel",event=>{
+  if(!shell.hidden||event.deltaY<=0||cover.getBoundingClientRect().bottom<window.innerHeight*.4)return;
+  event.preventDefault();startCoverTransition();
+},{passive:false});
 function navState(target){document.querySelectorAll(".nav-link").forEach(x=>x.classList.toggle("active",x.dataset.nav===target))}
 function openWork(name){
   active=name;shell.hidden=false;pages.forEach(x=>x.hidden=x.dataset.page!==name);shell.scrollTop=0;navState("all");
