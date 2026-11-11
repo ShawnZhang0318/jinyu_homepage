@@ -1,0 +1,48 @@
+{
+  "tests": [
+    {
+      "label": "stamps-desktop",
+      "width": 1024,
+      "continuous": true,
+      "bothDirections": true,
+      "loop": true,
+      "directAndRoute": true,
+      "reducedMotion": true,
+      "nativeVerticalSwipe": false,
+      "noHorizontalOverflow": true
+    },
+    {
+      "label": "stamps-375",
+      "width": 375,
+      "continuous": true,
+      "bothDirections": true,
+      "loop": true,
+      "directAndRoute": true,
+      "reducedMotion": true,
+      "nativeVerticalSwipe": true,
+      "noHorizontalOverflow": true
+    },
+    {
+      "label": "stamps-320",
+      "width": 320,
+      "continuous": true,
+      "bothDirections": true,
+      "loop": true,
+      "directAndRoute": true,
+      "reducedMotion": true,
+      "nativeVerticalSwipe": true,
+      "noHorizontalOverflow": true
+    }
+  ],
+  "recordings": [
+    {
+      "name": "stamps-desktop",
+      "frames": 66
+    },
+    {
+      "name": "stamps-375",
+      "frames": 89
+    }
+  ],
+  "errors": []
+}

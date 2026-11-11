@@ -1,0 +1,43 @@
+{
+  "tests": [
+    {
+      "label": "site-desktop",
+      "width": 1024,
+      "zoom": true,
+      "story": true,
+      "returned": true,
+      "frameDisposed": true
+    },
+    {
+      "label": "site-mobile",
+      "width": 375,
+      "zoom": true,
+      "story": true,
+      "returned": true,
+      "frameDisposed": true
+    },
+    {
+      "label": "site-empty",
+      "width": 375,
+      "zoom": true,
+      "story": true,
+      "returned": true,
+      "frameDisposed": true
+    }
+  ],
+  "recordings": [
+    {
+      "name": "site-desktop",
+      "frames": 63
+    },
+    {
+      "name": "site-mobile",
+      "frames": 145
+    },
+    {
+      "name": "site-empty",
+      "frames": 117
+    }
+  ],
+  "errors": []
+}

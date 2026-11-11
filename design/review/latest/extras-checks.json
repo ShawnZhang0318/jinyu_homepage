@@ -1,0 +1,14 @@
+{
+  "tests": [
+    {
+      "label": "production",
+      "desktopReducedMotion": true,
+      "emptyWithNoPhotos": true,
+      "listSwitchDisposesAndRemounts": true,
+      "width320WebGLUnavailable": true,
+      "width320ListAndExit": true
+    }
+  ],
+  "recordings": [],
+  "errors": []
+}

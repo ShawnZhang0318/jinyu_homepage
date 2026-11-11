@@ -1,0 +1,31 @@
+{
+  "tests": [
+    {
+      "label": "original-desktop",
+      "width": 1024,
+      "zoom": true,
+      "story": true,
+      "returned": true,
+      "frameDisposed": false
+    },
+    {
+      "label": "original-mobile",
+      "width": 375,
+      "zoom": true,
+      "story": true,
+      "returned": true,
+      "frameDisposed": false
+    }
+  ],
+  "recordings": [
+    {
+      "name": "original-desktop",
+      "frames": 49
+    },
+    {
+      "name": "original-mobile",
+      "frames": 116
+    }
+  ],
+  "errors": []
+}

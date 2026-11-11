@@ -1,12 +1,27 @@
 # 赵靖瑜个人作品集
 
-这是一个原生 HTML、CSS 与 JavaScript 单页网站，无需安装依赖或构建。
+这是一个原生 HTML、CSS 和 JavaScript 的作品集网站，不需要安装构建工具或依赖。Photography 雨幕使用浏览器 WebGL 2 模块，需要通过本地 HTTP 服务运行。
 
-直接在浏览器打开 index.html。也可以在此目录运行 python -m http.server 8000，再访问 http://localhost:8000。
+## 本地预览
 
-素材位置：
-- public/assets/cover.jpg：从提供的界面粗稿中裁出的封面视觉。
-- public/assets/portrait.jpg：从粗稿中裁出的人物插画。
-- public/assets/mory.jpg：从粗稿中裁出的 MORY 页面视觉。
+在项目目录启动：
 
-设计、活动、摄影和视频中标注“待补充”的区域是素材占位。提供实际作品图片和项目介绍后，可替换对应展示内容；图片建议放在 public/assets/。
+\`\`\`powershell
+python -m http.server 8765 --bind 127.0.0.1
+\`\`\`
+
+打开 [http://127.0.0.1:8765/](http://127.0.0.1:8765/)。
+
+首页向下滚动可进入 About Me 和五类邮票目录。可直接用这些地址预览：
+
+- [邮票目录](http://127.0.0.1:8765/#catalog)：滑动或箭头连续切换邮票；五类按钮可直接选择分类。
+- [Design](http://127.0.0.1:8765/#design)：自动播放作品时钟，点击 Learn more 浏览详情。
+- [Photography](http://127.0.0.1:8765/#photography)：WebGL 2 雨幕；滚轮或双指缩放，选中光丝后可展开摄影作品。
+
+## 内容与项目文件
+
+在 [portfolio-content.js](portfolio-content.js) 添加已经确认可以公开的 Marketing、Campaign、Photography 与 Video 内容。没有素材的类别会显示待补充状态。Design 海报使用 \`public/assets/design-clock/\` 和 \`public/assets/design-gallery/\` 中的图像。Undertow 源码与 MIT 许可位于 \`public/undertow/\`。
+
+从原始图片目录准备正式素材时，请保留原件，并按需导出网页资源到 \`public/assets/\`。不要把审核用的测试卡片当作正式作品。
+
+[当前实现交接、截图和录屏](design/implementation-handoff.md)记录了页面入口、交互步骤、检查结果与待补素材。[Undertow 上游来源及本站改动](public/undertow/UPSTREAM.md)。
